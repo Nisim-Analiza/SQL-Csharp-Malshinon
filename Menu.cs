@@ -1,62 +1,70 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Data;
+// Add Utils namespace
+using Utils;
 
 namespace Malshinon
 {
     internal class Menu
     {
-        static UseSQL DB = UseSQL.Instance();
+        private readonly UseSQL _db = UseSQL.Instance;
+
+        private const string PeopleTable = "peoples";
+        private const string IntelTable = "intelreports";
+
         public void Start()
         {
-            DB.DatabaseName = "Malshinon";
-            DB.UserName = "root";
-            DB.Server = "127.0.0.1";
-            string choice;
+            try
+            {
+                _db.LoadConnectionString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to load DB settings: " + ex.Message);
+                return;
+            }
             while (true)
             {
-                Console.WriteLine(
-                "Enter Your choice: \n" +
-                "options: \n" +
-                "1 - see all people table\n" +
-                "2 - see all intels table\n" +
-                "5 - Exit\n"
-                );
-                choice = Console.ReadLine();
-                switch (choice) 
+                ShowMenu();
+                string choice = Console.ReadLine()?.Trim();
+
+                switch (choice)
                 {
                     case "1":
-                        List<Dictionary<string, object>> peoples = DB.RunQuery("SELECT * FROM peoples");
-                        foreach (var item in peoples)
-                        {
-                            foreach (var kvp in item)
-                            {
-                                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-                            }
-                            Console.WriteLine();
-                        }
+                        DisplayTable(PeopleTable);
                         break;
+
                     case "2":
-                        List<Dictionary<string, object>> intels = DB.RunQuery("SELECT * FROM intelreports");
-                        foreach (var item in intels)
-                        {
-                            foreach (var kvp in item)
-                            {
-                                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-                            }
-                            Console.WriteLine();
-                        }
+                        DisplayTable(IntelTable);
                         break;
+
                     case "5":
+                        Console.WriteLine("Exiting...");
                         return;
+
                     default:
-                        Console.WriteLine("Please type valid choice!");
+                        Console.WriteLine("Invalid choice. Please try again.\n");
                         break;
                 }
             }
         }
+
+   
+
+        private void ShowMenu()
+        {
+            Console.WriteLine(
+                "\nEnter your choice:\n" +
+                "1 - See all people\n" +
+                "2 - See all intel reports\n" +
+                "5 - Exit\n"
+            );
+        }
+
+        private void DisplayTable(string tableName)
+        {
+            var rows = _db.RunQuery("SELECT * FROM " + tableName);
+            RowPrinter.Print(rows);
+        }
     }
-}
+}   
