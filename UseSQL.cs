@@ -1,83 +1,67 @@
-﻿using System.Data.SqlClient;
-using System;
-using MySql.Data;
-using MySql.Data.MySqlClient;
-using Malshinon;
+﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 
 namespace Data
 {
     public class UseSQL
     {
-        private UseSQL()
+        private string _connectionString;
+
+        private static UseSQL _instance;
+        public static UseSQL Instance
         {
+            get
+            {
+                if (_instance == null)
+                    _instance = new UseSQL();
+                return _instance;
+            }
         }
 
-        public string Server { get; set; }
-        public string DatabaseName { get; set; }
-        public string UserName { get; set; }
-        public string Password { get; set; }
+        private UseSQL() { }
 
-        public MySqlConnection Connection { get; set; }
-
-        private static UseSQL _instance = null;
-        public static UseSQL Instance()
+        public void LoadConnectionString()
         {
-            if (_instance == null)
-                _instance = new UseSQL();
-            return _instance;
+            var cs = ConfigurationManager.ConnectionStrings["MySqlConnection"];
+            if (cs == null)
+                throw new Exception("Connection string 'MySqlConnection' not found in App.config");
+
+            _connectionString = cs.ConnectionString;
         }
 
-        public bool IsConnect()
-        {
-            if (string.IsNullOrEmpty(Server) || string.IsNullOrEmpty(DatabaseName) || string.IsNullOrEmpty(UserName))
-                return false;
-
-            return true;
-        }
-
-        public void Close()
-        {
-            Connection.Close();
-        }
-
-
-        public List<Dictionary<string, object>> RunQuery(string query = "SELECT * FROM peoples")
+        public List<Dictionary<string, object>> RunQuery(string query)
         {
             var results = new List<Dictionary<string, object>>();
 
-            if (!IsConnect())
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                Console.WriteLine("Connection string not loaded.");
                 return results;
-
-            string connstring = $"Server={Server}; database={DatabaseName}; UID={UserName}; password={Password}";
+            }
 
             try
             {
-                using (var connection = new MySqlConnection(connstring))
+                using (var connection = new MySqlConnection(_connectionString))
                 {
                     connection.Open();
-                    using (var cmd = new MySqlCommand(query, connection))
-                    using (var reader = cmd.ExecuteReader())
+                    using (var command = new MySqlCommand(query, connection))
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             var row = new Dictionary<string, object>();
                             for (int i = 0; i < reader.FieldCount; i++)
-                            {
                                 row[reader.GetName(i)] = reader.GetValue(i);
-                            }
                             results.Add(row);
                         }
                     }
                 }
             }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine("MySQL Error: " + ex.Message);
-            }
             catch (Exception ex)
             {
-                Console.WriteLine("General Error: " + ex.Message);
+                Console.WriteLine("Database error: " + ex.Message);
             }
 
             return results;
