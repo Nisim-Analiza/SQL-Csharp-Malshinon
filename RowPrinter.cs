@@ -10,7 +10,7 @@ namespace Utils
         {
             if (rows == null || rows.Count == 0)
             {
-                Console.WriteLine("No data to display.");
+                Console.WriteLine("No data to display!.");
                 return;
             }
 
