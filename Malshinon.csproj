@@ -95,13 +95,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IntelReport.cs" />
-    <Compile Include="Menu.cs" />
-    <Compile Include="People.cs" />
+    <Compile Include="Repositories\Interfaces\IIntelReportRepository.cs" />
+    <Compile Include="UI\Menu.cs" />
+    <Compile Include="Models\IntelReport.cs" />
+    <Compile Include="Models\Person.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RowPrinter.cs" />
-    <Compile Include="UseSQL.cs" />
+    <Compile Include="Repositories\Interfaces\IPersonCommandRepository.cs" />
+    <Compile Include="Repositories\Interfaces\IPersonQueryRepository.cs" />
+    <Compile Include="Repositories\MySql\MySqlIntelReportRepository.cs" />
+    <Compile Include="Repositories\MySql\MySqlPersonCommandRepository.cs" />
+    <Compile Include="Repositories\MySql\MySqlPersonQueryRepository.cs" />
+    <Compile Include="UI\RowPrinter.cs" />
+    <Compile Include="Services\IntelService.cs" />
+    <Compile Include="Services\PersonService.cs" />
+    <Compile Include="Services\PersonStatusRules.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
